@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday Kia 💖</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@600;700&family=Nunito:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #e8a7b5; /* Deep Pink Pastel yang teduh & premium */
+        overflow: hidden;
+        font-family: "Quicksand", sans-serif;
+        height: 100vh;
+        width: 100vw;
+        color: #4a2830;
+      }
+      
+      /* Animasi Kelopak Bunga/Hati Berguguran di Background */
+      #bg-decor {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      .bg-heart {
+        position: absolute;
+        color: rgba(255, 182, 193, 0.6);
+        animation: fall linear infinite;
+      }
+      @keyframes fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+      }
+      
+      #confCanvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 997;
+      }
+
+      #overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* PHASE 1: TOMBOL BUKA SURPRISE */
+      #phase-input {
+        text-align: center;
+        animation: scaleIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        padding: 2.5rem 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        border: 4px solid #ff758f;
+        border-radius: 30px;
+        box-shadow: 0 15px 35px rgba(139, 50, 66, 0.3);
+        max-width: 90vw;
+      }
+      .inp-title {
+        font-family: 'Fredoka One', cursive;
+        font-size: clamp(1.6rem, 6vw, 2.5rem);
+        color: #c2185b;
+        text-shadow: 2px 2px 0px #fff;
+        margin-bottom: 1rem;
+      }
+      .inp-sub {
+        font-size: clamp(0.9rem, 3vw, 1.1rem);
+        color: #a24857;
+        font-weight: 700;
+        margin-bottom: 2rem;
+      }
+      .start-btn {
+        display: inline-block;
+        padding: 1.2em 3.5em;
+        font-family: 'Fredoka One', cursive;
+        font-size: clamp(0.9rem, 3vw, 1.1rem);
+        color: #fff;
+        background: linear-gradient(135deg, #ff758f, #c2185b);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(194, 24, 91, 0.4);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .start-btn:hover {
+        transform: scale(1.05) translateY(-3px);
+        box-shadow: 0 12px 30px rgba(194, 24, 91, 0.5);
+      }
+
+      /* PHASE 2: COUNTDOWN INTERAKTIF */
+      #phase-countdown {
+        display: none;
+        text-align: center;
+      }
+      .cd-num {
+        font-family: 'Fredoka One', cursive;
+        font-size: clamp(6rem, 25vw, 12rem);
+        color: #c2185b;
+        text-shadow: 4px 4px 0px #fff, 0 0 30px rgba(194, 24, 91, 0.4);
+        line-height: 1;
+        animation: countPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      .cd-out { animation: countFade 0.4s ease forwards !important; }
+
+      /* PHASE 3: REVEAL TEXT */
+      #phase-reveal {
+        display: none;
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .rl {
+        font-family: 'Fredoka One', cursive;
+        color: #c2185b;
+        text-shadow: 3px 3px 0px #fff;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .rl.show { opacity: 1; transform: scale(1); }
+      .rl-happy { font-size: clamp(2.5rem, 10vw, 4.5rem); color: #ff69b4; }
+      .rl-bday { font-size: clamp(3rem, 13vw, 5.5rem); }
+      .rl-to { font-size: clamp(1.5rem, 6vw, 2.5rem); color: #ff8da1; }
+      .rl-name { font-size: clamp(5rem, 20vw, 8.5rem); color: #ad1457; text-shadow: 4px 4px 0px #fff; }
+
+      /* PHASE 4: CARD OPENER (TAP TO UNLOCK) */
+      #phase-card-click {
+        display: none;
+        text-align: center;
+        z-index: 15;
+      }
+      .gift-envelope {
+        width: min(320px, 85vw);
+        background: #fff;
+        padding: 2rem;
+        border-radius: 24px;
+        border: 4px solid #ff758f;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: transform 0.4s ease;
+        animation: scaleIn 0.5s both;
+      }
+      .gift-envelope:hover { transform: scale(1.03) rotate(-1deg); }
+      .env-heart {
+        font-size: 5rem;
+        animation: heartbeat 1.2s infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+      }
+
+      /* PHASE 5: MAIN WEB CONTENT */
+      #phase-main {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 4rem 1rem;
+        scroll-behavior: smooth;
+      }
+      #phase-main::-webkit-scrollbar { width: 6px; }
+      #phase-main::-webkit-scrollbar-thumb { background: #ff8da1; border-radius: 10px; }
+
+      /* Profile Frame Bulat Berputar */
+      .profile-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 1.5rem;
+        animation: spinGlow 10s linear infinite;
+      }
+      @keyframes spinGlow {
+        0% { transform: rotate(0deg); filter: drop-shadow(0 0 10px #ff69b4); }
+        100% { transform: rotate(360deg); filter: drop-shadow(0 0 10px #ff69b4); }
+      }
+      .profile-circle {
+        width: 100%; height: 100%; border-radius: 50%;
+        border: 4px dashed #fff; padding: 4px; background: rgba(255,255,255,0.6); overflow: hidden;
+      }
+      .profile-img-fix { width: 100%; height: 100%; animation: spinCounter 10s linear infinite; }
+      @keyframes spinCounter { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+      .profile-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+      .sw {
+        width: 100%; max-width: 600px; margin: 0 auto 3.5rem; text-align: center;
+        background: rgba(255, 255, 255, 0.92); border: 3px solid #fff;
+        padding: 3rem 2rem; border-radius: 32px; box-shadow: 0 12px 30px rgba(139,77,88,0.2);
+        transform: translateY(40px); opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      .sw.vis { transform: translateY(0); opacity: 1; }
+      
+      .sec-tag { font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.15em; color: #c2185b; margin-bottom: 0.5rem; }
+      .sec-title { font-family: 'Fredoka One', cursive; font-size: clamp(1.4rem, 5vw, 2rem); color: #ad1457; margin-bottom: 1.8rem; }
+      .sep { width: 80px; height: 5px; background: #ff8da1; border-radius: 10px; margin: 0 auto 3.5rem; }
+
+      /* CAKE */
+      .cake-wrap { cursor: pointer; display: inline-block; transition: transform 0.3s; }
+      .cake-wrap:hover { transform: scale(1.05); }
+      .cake-svg { width: min(240px, 65vw); }
+      .flame-g { transform-origin: 50% 90%; animation: flicker 0.25s ease-in-out infinite alternate; }
+      @keyframes flicker { from { transform: rotate(-2deg); } to { transform: rotate(3deg); } }
+      .blow-btn-d {
+        margin: 1.5rem auto 0; padding: 0.8em 2.5em; font-family: 'Fredoka One', cursive; font-size: 0.9rem;
+        color: #fff; background: #c2185b; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      }
+      .wish-r { margin-top: 1.2rem; font-weight: 700; color: #c2185b; opacity: 0; transform: translateY(10px); transition: all 0.7s; }
+      .wish-r.show { opacity: 1; transform: translateY(0); }
+
+      /* BALLOONS */
+      .bln-stage { position: relative; height: 240px; max-width: 500px; margin: 0 auto; }
+      .bln { position: absolute; bottom: 0; cursor: pointer; animation: bFloat ease-in-out infinite; transform-origin: bottom center; }
+      .bln.popped { animation: bPop 0.3s forwards !important; }
+      .bln-body { font-size: 3.2rem; display: block; }
+      .bln-string { display: block; width: 2px; height: 40px; background: #ff8da1; margin: 0 auto; }
+      .bln-word { font-weight: 700; font-size: 0.75rem; color: #c2185b; }
+
+      /* COLLAGE FORMATION HEART */
+      .heart-collage {
+        position: relative;
+        width: 320px;
+        height: 300px;
+        margin: 2rem auto 0;
+      }
+      .collage-img {
+        position: absolute;
+        width: 65px;
+        height: 65px;
+        border-radius: 12px;
+        border: 2px solid #fff;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+      }
+      .collage-img:hover { transform: scale(1.2); z-index: 99; }
+
+      /* FLOATING PARTICLES INTERACTIVE */
+      .fh { position: fixed; pointer-events: none; animation: fhFloat 1.8s ease forwards; z-index: 998; }
+      @keyframes fhFloat { 0% { opacity: 0; transform: translateY(0) scale(0.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
+      @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      @keyframes countPop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      @keyframes countFade { to { transform: scale(2); opacity: 0; } }
+    </style>
+  </head>
+  <body>
+
+    <audio id="bgMusic" loop>
+      <source src="https://open.spotify.com/embed/track/4PwWESSlTwzvw9B7bmtTLS?utm_source=generator" type="audio/mp3">
+    </audio>
+
+    <div id="bg-decor"></div>
+    <canvas id="confCanvas"></canvas>
+
+    <div id="overlay">
+      <div id="phase-input">
+        <p class="inp-title">🌸 DEAREST KIA 🌸</p>
+        <p class="inp-sub">Ada sepucuk surat dari Fadil Ganteng Maksimal</p>
+        <button class="start-btn" onclick="startShow()">
+          💖 BUKA SEKARANG
+        </button>
+      </div>
+
+      <div id="phase-countdown">
+        <div class="cd-num" id="cdNum">3</div>
+      </div>
+
+      <div id="phase-reveal">
+        <div class="rl rl-happy" id="rl0">HAPPY</div>
+        <div class="rl rl-bday" id="rl1">BIRTHDAY</div>
+        <div class="rl rl-to" id="rl2">TO</div>
+        <div class="rl rl-name" id="rl3">KIA</div>
+      </div>
+
+      <div id="phase-card-click">
+        <div class="gift-envelope" onclick="unlockMainStory()">
+          <div class="env-heart">💝</div>
+          <p style="font-weight: 700; color: #c2185b;">Ketuk ya byub buat melihat hal romantuis</p>
+        </div>
+      </div>
+
+      <div id="phase-main">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+          
+          <div class="profile-container">
+            <div class="profile-circle">
+              <div class="profile-img-fix">
+                <img id="avatarKia" src="foto/kia4.jpg" alt="Foto Kia">
+              </div>
+            </div>
+          </div>
+
+          <p class="sec-tag">✨ HAPPY LEVEL UP DAY ✨</p>
+          <h1 style="font-family: 'Fredoka One', cursive; font-size: clamp(3.5rem, 14vw, 6rem); color: #ad1457; text-shadow: 2px 2px 0px #fff;">
+            KIA
+          </h1>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="sw">
+          <p class="sec-tag">🎂 MAKE A WISH 🎂</p>
+          <h2 class="sec-title">KIA BUBUB ACU TIUP LILIN YUW</h2>
+          <div class="cake-wrap" onclick="blowCandles()">
+            <svg class="cake-svg" viewBox="0 0 280 290" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="140" cy="258" rx="112" ry="15" fill="#cf8a97" opacity="0.5" />
+              <rect x="28" y="196" width="224" height="60" rx="15" fill="#ff8da1" />
+              <path d="M28,196 Q50,183 70,193 Q92,203 112,188 Q132,175 152,188 Q172,201 192,188 Q212,175 232,188 Q252,201 252,196 L252,204 Q232,195 212,202 Q192,210 172,198 Q152,187 132,198 Q112,210 92,200 Q72,190 52,200 Q36,207 28,202Z" fill="#c2185b" />
+              <rect x="48" y="136" width="184" height="63" rx="12" fill="#ffa4b6" />
+              <g id="f2">
+                <rect x="135.5" y="52" width="9" height="36" rx="2" fill="#ffd700" />
+                <g class="flame-g" id="flame">
+                  <ellipse cx="140" cy="45" rx="4" ry="7.5" fill="#ffd43b" />
+                </g>
+              </g>
+            </svg>
+          </div>
+          <br>
+          <button class="blow-btn-d" onclick="blowCandles()">PENCET MBRET</button>
+          <p class="wish-r" id="wishR">🌸 Semoga Hal Hal Baik datang di hidupmu yaa Kia! 🌸</p>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="sw">
+          <p class="sec-tag">🎈 POP IT BALON 🎈</p>
+          <h2 class="sec-title">Pecahin Balon Balon ini Mbretg</h2>
+          <div class="bln-stage" id="blnStage"></div>
+          <button class="blow-btn-d" onclick="resetBalloons()">🎈 ULANGIN BALONNYA</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="sw">
+          <p class="sec-tag">💌 PIECE OF LETTER 💌</p>
+          <h2 class="sec-title">Surat Tulis Dari Hati</h2>
+          <div class="msg-card">
+            <p class="msg-text">
+              "Selamat Ulang tahun yaa Kiaaa,semoga panjang umur,sehat selalu,semoga cita cita tercapai secepatnya,semoga hal hal baik datang selalu kepaamu,jika ada yang buruk pada hidupmu semoga di jauhkan,semoga makin cantik makin sholehah,kurangin ya ngevapenya,alihin ke buah buahan ya bu dokterku,semoga menjadi diri pribadi yang lebih baik lagi,maafin fadil,fadil baru bisa ngasih ini yaa,semoga kia suka sama pemberian fadil,jika kia ada apa apa kabarin fadil aja ya,fadil selalu sedia kok buat dengerin cerita seneng buruk sedihmu,tapi kamu gboleh sedih,masa cewe cantik dikit dikit sedih,kan pahlawannya mama papa,yaa? stop nyakitin diri sendiri ya,kalo kamu lagi kecewa lagi sakit hati,teriak sekenceng kencengnya aja yaa,alihin ke hal poisitif oke?? bisa juga call fadil buat nenangin pikiranmu okei yaa,abistu langsung tidur,itu cuma adrenalin yang kepicu kok,nanti juga bakal redaaa.semoga menjadi diri pribadi yang lebih baik dan semakin baik,btw maaf ya sekali lagi fadil blum bisa ngasi apa apa yang kia bayangin,sekian terimakasih ki.Salam Dari Fadil "
+            </p>
+            <p class="msg-from">— DARI FADIL YANG SELALU GANTENG ✨</p>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="sw">
+          <p class="sec-tag">💖 MEMORY SHAPE 💖</p>
+          <h2 class="sec-title">Our Special Heart</h2>
+          <div class="heart-collage" id="heartCollage"></div>
+        </div>
+
+        <footer style="font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: #8a4f59; margin-top: 1rem;">
+          🎀 HAPPY BIRTHDAY KIA KENTUTKU🎀
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // BACKGROUND ENGINE: Floating Shapes
+      function createHearts() {
+        const bg = document.getElementById("bg-decor");
+        const items = ["🌸", "💖", "💕", "✨"];
+        setInterval(() => {
+          const h = document.createElement("div"); h.className = "bg-heart";
+          h.textContent = items[Math.floor(Math.random() * items.length)];
+          h.style.left = Math.random() * 100 + "vw";
+          h.style.fontSize = (14 + Math.random() * 16) + "px";
+          h.style.animationDuration = (4 + Math.random() * 3) + "s";
+          bg.appendChild(h); setTimeout(() => h.remove(), 6000);
+        }, 400);
+      }
+      createHearts();
+
+      // CONFETTI FALLING GENERATOR
+      const cc = document.getElementById("confCanvas"), cx = cc.getContext("2d");
+      let pcs = [], aid;
+      function rsCC() { cc.width = window.innerWidth; cc.height = window.innerHeight; }
+      rsCC(); window.addEventListener("resize", rsCC);
+      
+      function launchConf() {
+        pcs = []; const cl = ["#ff69b4", "#ff8da1", "#ffb6c1", "#c2185b", "#fff"];
+        for (let i = 0; i < 130; i++)
+          pcs.push({
+            x: Math.random() * cc.width, y: -20, r: 4 + Math.random() * 4,
+            color: cl[Math.floor(Math.random() * cl.length)],
+            vx: (Math.random() - 0.5) * 5, vy: 2 + Math.random() * 4,
+            rot: Math.random() * 360, rv: (Math.random() - 0.5) * 5,
+            w: 6 + Math.random() * 4, h: 8 + Math.random() * 6, s: Math.random() < 0.5 ? "r" : "c"
+          });
+        cancelAnimationFrame(aid); animConf();
+      }
+      function animConf() {
+        cx.clearRect(0, 0, cc.width, cc.height);
+        pcs = pcs.filter((p) => p.y < cc.height + 30);
+        pcs.forEach((p) => {
+          p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.vy += 0.08;
+          cx.save(); cx.translate(p.x, p.y); cx.rotate((p.rot * Math.PI) / 180); cx.fillStyle = p.color;
+          if (p.s === "r") cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          else { cx.beginPath(); cx.arc(0, 0, p.r, 0, Math.PI * 2); cx.fill(); }
+          cx.restore();
+        });
+        if (pcs.length) aid = requestAnimationFrame(animConf);
+      }
+
+      // APP FLOW INTERACTION WITH 30% VOLUME CONTROL
+      function startShow() {
+        const music = document.getElementById("bgMusic");
+        
+        // MENGATUR VOLUME SECARA AMAN DI 30%
+        music.volume = 0.3;
+        
+        music.play().catch(() => console.log("Audio Playback Triggered."));
+        document.getElementById("phase-input").style.display = "none";
+        showCD();
+      }
+      function showCD() {
+        const ph = document.getElementById("phase-countdown"); ph.style.display = "block";
+        const nums = ["3", "2", "1", "🌸"]; let i = 0;
+        function tick() {
+          const el = document.getElementById("cdNum"); el.textContent = nums[i]; i++;
+          if (i < nums.length) setTimeout(tick, 1000);
+          else {
+            el.classList.add("cd-out");
+            setTimeout(() => { ph.style.display = "none"; showReveal(); }, 500);
+          }
+        }
+        tick();
+      }
+      function showReveal() {
+        const ph = document.getElementById("phase-reveal"); ph.style.display = "flex";
+        ["rl0", "rl1", "rl2", "rl3"].forEach((id, i) =>
+          setTimeout(() => document.getElementById(id).classList.add("show"), i * 450)
+        );
+        setTimeout(launchConf, 500);
+        setTimeout(() => { ph.style.display = "none"; document.getElementById("phase-card-click").style.display = "block"; }, 4200);
+      }
+      function unlockMainStory() {
+        document.getElementById("phase-card-click").style.display = "none";
+        document.getElementById("phase-main").style.display = "flex";
+        launchConf(); buildBalloons(); generateHeartCollage(); setupReveal();
+      }
+
+      // CANDLE DEACTIVATION
+      function blowCandles() {
+        const f = document.getElementById("flame");
+        if (f) { f.style.transform = "scale(0)"; f.style.opacity = "0"; f.style.transition = "all 0.4s"; }
+        setTimeout(() => { document.getElementById("wishR").classList.add("show"); launchConf(); }, 500);
+      }
+
+      // BALLOON LOGIC GENERATOR
+      const bD = [
+        { e: "🩷", w: "CANTIK", l: "8%" }, { e: "🌸", w: "IMUT", l: "28%" },
+        { e: "💝", w: "BAHAGIA", l: "48%" }, { e: "✨", w: "SUKSES", l: "68%" },
+        { e: "🎀", w: "CERIA", l: "86%" }
+      ];
+      function buildBalloons() {
+        const st = document.getElementById("blnStage"); st.innerHTML = "";
+        bD.forEach((d, i) => {
+          const b = document.createElement("div"); b.className = "bln";
+          b.style.cssText = "left:" + d.l + "; animation-duration:" + (2.5 + Math.random()) + "s; animation-delay:" + (i * 0.2) + "s;";
+          b.innerHTML = '<span class="bln-body">' + d.e + '</span><span class="bln-string"></span><p class="bln-word">' + d.w + '</p>';
+          b.addEventListener("click", () => { b.classList.add("popped"); launchConf(); setTimeout(() => b.remove(), 250); });
+          st.appendChild(b);
+        });
+      }
+      function resetBalloons() { buildBalloons(); }
+
+      // FORM MATRIKS HATI DARI FOTO KIA
+      function generateHeartCollage() {
+        const stage = document.getElementById("heartCollage");
+        const coords = [
+          {x: 120, y: 20}, {x: 180, y: 20},
+          {x: 60, y: 50},  {x: 120, y: 50},  {x: 180, y: 50}, {x: 240, y: 50},
+          {x: 30, y: 90},  {x: 270, y: 90},
+          {x: 30, y: 140}, {x: 270, y: 140},
+          {x: 60, y: 190}, {x: 240, y: 190},
+          {x: 100, y: 230},{x: 200, y: 230},
+          {x: 150, y: 260}
+        ];
+        
+        // --- SEBELUM DICOPAS, AMBIL INFO DI SINI ---
+        // Jika kamu punya file foto lokal (misal: kia1.jpg, kia2.jpg, sampai kia15.jpg),
+        // masukkan nama file tersebut ke dalam daftar array di bawah ini:
+        const fotoKia = [
+          "foto/kia1.jpg",  // Foto 1 (paling atas kiri)
+          "foto/kia2.jpg",  // Foto 2 (paling atas kanan)
+          "foto/kia3.jpg",  // Foto 3
+          "foto/kia4.jpg",  // Foto 4
+          "foto/kia5.jpg",  // Foto 5
+          "foto/kia6.jpg",  // Foto 6
+          "foto/kia7.jpg",  // Foto 7
+          "foto/kia8.jpg",  // Foto 8
+          "foto/kia9.jpg",  // Foto 9
+          "foto/kia10.jpg", // Foto 10
+          "foto/kia12.jpg", // Foto 11
+          "foto/kia1.jpg", // Foto 12
+          "foto/kia13.jpg", // Foto 13
+          "foto/kia1.jpg",  // Foto 14 (Pakai foto 1 lagi agar genap 15)
+          "foto/kia2.jpg"   // Foto 15 (Pakai foto 2 lagi agar genap 15)
+        ];
+        
+        coords.forEach((pos, index) => {
+          const img = document.createElement("img");
+          img.className = "collage-img";
+          img.src = fotoKia[index];
+          img.style.left = pos.x + "px";
+          img.style.top = pos.y + "px";
+          img.style.animation = "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both";
+          img.style.animationDelay = (index * 0.15) + "s";
+          stage.appendChild(img);
+        });
+      }
+
+      // SCROLL VIEW REVEALER
+      function setupReveal() {
+        const els = document.querySelectorAll(".sw");
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => { if (en.isIntersecting) en.target.classList.add("vis"); });
+        }, { threshold: 0.05 });
+        els.forEach((el) => io.observe(el));
+      }
+    </script>
+  </body>
+</html>
